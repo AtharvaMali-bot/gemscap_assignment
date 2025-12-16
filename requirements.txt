@@ -1,0 +1,7 @@
+websockets
+redis
+streamlit
+pandas
+numpy
+plotly
+asyncio

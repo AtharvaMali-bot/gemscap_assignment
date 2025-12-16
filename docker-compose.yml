@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  ingestion:
+    build: .
+    command: python -u src/ingestion/main.py
+    volumes:
+      - .:/app
+    working_dir: /app
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - SYMBOL=btcusdt
+
+  analytics:
+    build: .
+    command: python -u src/analytics/main.py
+    volumes:
+      - .:/app
+    working_dir: /app
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - SYMBOL=btcusdt
+
+  dashboard:
+    build: .
+    command: streamlit run src/dashboard/app.py
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - "8501:8501"
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - SYMBOL=btcusdt
+
+# Basic Dockerfile for all python services
+# Create a file named 'Dockerfile' in the root:
+# FROM python:3.9-slim
+# COPY requirements.txt .
+# RUN pip install --no-cache-dir -r requirements.txt
+# COPY . /app
